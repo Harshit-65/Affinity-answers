@@ -62,7 +62,7 @@ def validate_address(address):
     address_tokens = clean_text(address)
     
     for office in data[0]["PostOffice"]:
-        # Gather expected tokens from Name
+        # here we gather expected tokens from Name
         expected_tokens = set(clean_text(office.get("Name", "")))
         
         
@@ -70,13 +70,13 @@ def validate_address(address):
         print(f"Expected Tokens: {expected_tokens}")
         print(f"Address Tokens: {address_tokens}")
         
-        # Count the number of expected tokens that match any address token (using substring matching)
+        # See how many tokens from the post office name appear in the address
         match_count = 0
         for token in expected_tokens:
             if token_match(token, address_tokens):
                 match_count += 1
         
-        # Here's our scoring system - we need at least half the words to match
+        # Here's our scoring system : we need at least half the words to match
         # (minimum 2 matches if there are multiple words)
         if len(expected_tokens) > 1:
             required_matches = max(2, int(round(len(expected_tokens) * 0.5)))
@@ -92,6 +92,6 @@ def validate_address(address):
 
 if __name__ == "__main__":
     
-    address = "Kolsewadi, Katemanivali,Kalyan East, bangaluru, karnataka ,421306"
+    address = "Kolsewadi, Katemanivali,Kalyan East,421306"
     is_valid, message = validate_address(address)
     print(is_valid, message)

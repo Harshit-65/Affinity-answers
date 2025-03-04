@@ -3,27 +3,31 @@
 # Configuration
 URL="https://www.amfiindia.com/spages/NAVAll.txt"
 OUTPUT_FILE="nav_data.tsv"
+JSON_OUTPUT="nav_data.json"
 TEMP_FILE="temp_nav_data.txt"
 
-# clean up on script exit
 cleanup() {
     rm -f "$TEMP_FILE"
 }
 
-# Registering cleanup function
 trap cleanup EXIT
 
-# check if required commands exist
+# here we check if required commands exist
 check_dependencies() {
-    for cmd in curl awk; do
+    for cmd in curl awk jq; do
         if ! command -v "$cmd" >/dev/null 2>&1; then
             echo "Error: Required command '$cmd' not found"
+            if [ "$cmd" = "jq" ]; then
+                echo "Please install jq for JSON support"
+                echo "Ubuntu/Debian: sudo apt-get install jq"
+                echo "MacOS: brew install jq"
+                echo "Windows: choco install jq"
+            fi
             exit 1
         fi
     done
 }
 
-# download and validate the data
 download_data() {
     if ! curl -s "$URL" > "$TEMP_FILE"; then
         echo "Error: Failed to download data from $URL"
@@ -36,16 +40,14 @@ download_data() {
     fi
 }
 
-# process the data and create TSV
 process_data() {
-    # Add header to the TSV file
     echo -e "Scheme Name\tAsset Value" > "$OUTPUT_FILE"
 
     # Process the data:
-    # 1. Look for lines with semicolons
-    # 2. Extract fields 4 (Scheme Name) and 5 (Asset Value)
-    # 3. Remove any quotes
-    # 4. Convert to TSV format
+    # 1. we look for lines with semicolons
+    # 2. extract fields 4 (Scheme Name) and 5 (Asset Value)
+    # 3. we remove any quotes
+    # 4. then we convert to TSV format
     awk -F';' '
         NF >= 5 {
             # Remove any leading/trailing spaces
@@ -65,6 +67,20 @@ process_data() {
     ' "$TEMP_FILE" >> "$OUTPUT_FILE"
 }
 
+convert_to_json() {
+    echo "Converting to JSON format..."
+    # Skips header line and convert to JSON array
+    awk -F'\t' 'NR>1 {
+        printf "%s{\"scheme_name\": \"%s\", \"nav\": \"%s\"}", 
+            (NR>2 ? "," : ""), 
+            $1, 
+            $2
+    }' "$OUTPUT_FILE" | awk '{print "{\"schemes\": [" $0 "]}"}' > "$JSON_OUTPUT"
+    
+    jq '.' "$JSON_OUTPUT" > "${JSON_OUTPUT}.tmp" && mv "${JSON_OUTPUT}.tmp" "$JSON_OUTPUT"
+    echo "Created $JSON_OUTPUT"
+}
+
 validate_output() {
     if [ ! -s "$OUTPUT_FILE" ]; then
         echo "Error: Failed to create output file"
@@ -82,6 +98,7 @@ main() {
     download_data
     process_data
     validate_output
+    convert_to_json
 }
 
 main
@@ -97,8 +114,8 @@ main
 #       "scheme_name": "Aditya Birla Sun Life Banking & PSU Debt Fund - Direct Plan-Growth",
 #       "scheme_code": "119550",
 #       "isin": {
-#         "primary": "INF209K01YN0",
-#         "secondary": null
+#         "Payout": "INF209K01YN0",
+#         "Reinvestment": null
 #       },
 #       "nav": 366.7709,
 #       "date": "2025-02-12",
@@ -116,4 +133,3 @@ main
 # Support for nested structures and arrays
 # Better handling of optional fields
 # Widely supported format for APIs
-# Built-in validation capabilities with JSON Schema
