@@ -8,7 +8,7 @@ def clean_text(text):
       - Removing punctuation.
       - Converting to lowercase and splitting into tokens.
     """
-    # Removing text within parentheses (e.g., "(Bangalore)")
+    # Removing text within parentheses (e.g., "(east)")
     text = re.sub(r'\([^)]*\)', '', text)
     # Cleaning up all the punctuation marks
     text = re.sub(r'[^\w\s]', '', text)
@@ -27,13 +27,13 @@ def token_match(api_token, address_tokens):
     This helps match cases like "katemanivali" inside "katemanivalikalyan".
     """
     for token in address_tokens:
-        if api_token in token or token in api_token:
+        if api_token in token:
             return True
     return False
 
 def validate_address(address):
     """
-    Validates whether the free-flowing address matches the PIN code area.
+    Validates whether the address matches the PIN code area.
     
     For each Post Office in the API response for the PIN code,
       - It gathers expected tokens from:
@@ -56,6 +56,8 @@ def validate_address(address):
     except Exception as e:
         return False, f"API error: {e}"
     
+    # print(data)
+    # print(f'data[0]:{data[0].get("Status")}')
     if not data or data[0].get("Status") != "Success" or not data[0].get("PostOffice"):
         return False, "Invalid PIN code or API returned error."
 
@@ -65,10 +67,9 @@ def validate_address(address):
         # here we gather expected tokens from Name
         expected_tokens = set(clean_text(office.get("Name", "")))
         
-        
-        print(f"Checking Post Office: {office.get('Name')}")
-        print(f"Expected Tokens: {expected_tokens}")
-        print(f"Address Tokens: {address_tokens}")
+        # print(f"Checking Post Office: {office.get('Name')}")
+        # print(f"Expected Tokens: {expected_tokens}")
+        # print(f"Address Tokens: {address_tokens}")
         
         # See how many tokens from the post office name appear in the address
         match_count = 0
@@ -83,7 +84,7 @@ def validate_address(address):
         else:
             required_matches = 1
         
-        print(f"Match count: {match_count} (required: {required_matches})")
+        # print(f"Match count: {match_count} (required: {required_matches})")
         
         if match_count >= required_matches:
             return True, f"Address is valid. Found matching post office: '{office.get('Name')}'."

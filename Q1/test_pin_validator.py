@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from Q1.pin_validator import validate_address
+from pin_validator import validate_address
 
 # A fake response class to simulate requests.get() responses
 class FakeResponse:
