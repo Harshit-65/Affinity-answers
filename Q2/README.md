@@ -34,19 +34,15 @@ The `Q2.sql` file contains solutions for the following questions:
 1. Connect to the Rfam database:
 
 ```bash
-mysql -h mysql-rfam-public.ebi.ac.uk -u rfamro -P 4497 rfam
+mysql -h mysql-rfam-public.ebi.ac.uk -u rfamro -P 4497 Rfam
 ```
 
 2. Run the queries:
-
-```bash
-mysql -h mysql-rfam-public.ebi.ac.uk -u rfamro -P 4497 rfam < Q2.sql
-```
 
 ## Database Details
 
 - Host: mysql-rfam-public.ebi.ac.uk
 - Port: 4497
 - User: rfamro
-- Database: rfam
+- Database: Rfam
 - Access: Read-only

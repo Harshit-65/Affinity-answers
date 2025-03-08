@@ -1,14 +1,12 @@
 
 --1. Finding types of tigers and Sumatran Tiger's ncbi_id:
 
-SELECT scientific_name, ncbi_id
-FROM taxonomy 
-WHERE scientific_name LIKE '%Panthera tigris%';
+SELECT species, ncbi_id
+FROM taxonomy
+WHERE species LIKE '%Panthera tigris%';
 
--- For specifically Sumatran Tiger:
-SELECT ncbi_id 
-FROM taxonomy 
-WHERE scientific_name = 'Panthera tigris sumatrae';
+-- How many types of tigers are in the taxonomy table? => 8
+--  What is the "ncbi_id" of the Sumatran Tiger? => 9695
 
 -- 2. Finding connecting columns between tables:
 
@@ -22,24 +20,25 @@ WHERE scientific_name = 'Panthera tigris sumatrae';
 
 -- 3. Finding rice type with longest DNA sequence:
 
-SELECT t.species, MAX(r.length) as seq_length
-FROM taxonomy t
-JOIN rfamseq r ON t.ncbi_id = r.ncbi_id
-WHERE t.species LIKE '%Oryza%'  -- Oryza is the genus name for rice
-GROUP BY t.species
-ORDER BY seq_length DESC
+SELECT t.species, r.length
+FROM rfamseq r
+JOIN taxonomy t ON r.ncbi_id = t.ncbi_id
+WHERE t.species LIKE 'Oryza%'
+ORDER BY r.length DESC
 LIMIT 1;
 
+ -- Oryza is the genus name for rice
+ 
 -- 4. Paginating family names with DNA sequences > 1,000,000:
 
-SELECT f.rfam_acc, f.family_name, MAX(r.length) as max_length
+SELECT f.rfam_acc, f.rfam_id, MAX(r.length) AS max_length
 FROM family f
-JOIN full_region fr ON f.rfam_acc = fr.rfam_acc
-JOIN rfamseq r ON fr.rfamseq_acc = r.rfamseq_acc
-GROUP BY f.rfam_acc, f.family_name
-HAVING max_length > 1000000
+JOIN rfamseq r ON f.rfam_acc = r.rfamseq_acc
+WHERE r.length > 1000000
+GROUP BY f.rfam_acc, f.rfam_id
 ORDER BY max_length DESC
 LIMIT 15 OFFSET 120;  -- OFFSET = (page_number - 1) * results_per_page = (9-1) * 15 = 120
+
 
 
 -- We join the family, full_region, and rfamseq tables to get family information and sequence lengths
