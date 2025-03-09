@@ -14,6 +14,7 @@ WHERE species LIKE '%Panthera tigris%';
 -- family and full_region connect via rfam_acc
 -- rfamseq and full_region connect via rfamseq_acc
 -- rfamseq and taxonomy connect via ncbi_id
+-- full_region connects to taxonomy via ncbi_id
 -- family and clan_membership connect via rfam_acc
 -- clan and clan_membership connect via clan_acc
 
@@ -27,23 +28,39 @@ WHERE t.species LIKE 'Oryza%'
 ORDER BY r.length DESC
 LIMIT 1;
 
- -- Oryza is the genus name for rice
+ -- Oryza is the scientific name for rice
  
 -- 4. Paginating family names with DNA sequences > 1,000,000:
 
-SELECT f.rfam_acc, f.rfam_id, MAX(r.length) AS max_length
-FROM family f
-JOIN rfamseq r ON f.rfam_acc = r.rfamseq_acc
-WHERE r.length > 1000000
-GROUP BY f.rfam_acc, f.rfam_id
-ORDER BY max_length DESC
-LIMIT 15 OFFSET 120;  -- OFFSET = (page_number - 1) * results_per_page = (9-1) * 15 = 120
+SELECT f.rfam_acc, f.rfam_id, subq.max_len
+FROM (
+    SELECT DISTINCT fr.rfam_acc, MAX(r.length) as max_len
+    FROM full_region fr
+    JOIN (
+        SELECT count(*), rfamseq_acc, length 
+        FROM rfamseq 
+        WHERE length > 1000000
+    ) r ON fr.rfamseq_acc = r.rfamseq_acc
+    GROUP BY fr.rfam_acc
+    ORDER BY max_len DESC
+    LIMIT 15 OFFSET 120 
+) subq
+JOIN family f ON f.rfam_acc = subq.rfam_acc
+ORDER BY subq.max_len DESC;
+-- OFFSET = (page_number - 1) * results_per_page = (9-1) * 15 = 120
 
 
 
--- We join the family, full_region, and rfamseq tables to get family information and sequence lengths
--- Group by family to get one row per family
--- Filter for sequences > 1,000,000 using HAVING
--- Order by length in descending order
--- LIMIT 15 gets 15 results per page
--- OFFSET 120 skips the first 8 pages (8 * 15 = 120 rows) to get to the 9th page
+-- Filters rfamseq to only include sequences > 1,000,000 
+-- Joins filtered sequences with full_region to connect them to families ||rfam_acc: Family accession ID => family.rfam_acc || rfamseq_acc: Sequence accession ID => rfamseq.rfamseq_acc
+
+-- Groups by family ID to find maximum sequence length per family  
+-- Sorts families by their maximum sequence length (descending)
+-- Gets the 9th page (skips 120 rows, takes 15)
+-- Joins with family table to get the family names
+-- Returns final sorted list of family IDs, names, and maximum lengths
+
+-- Joining Logic
+
+-- full_region.rfamseq_acc = rfamseq.rfamseq_acc: Connects sequences to regions
+-- family.rfam_acc = full_region.rfam_acc: Connects regions to families
