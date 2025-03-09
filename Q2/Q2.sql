@@ -32,35 +32,48 @@ LIMIT 1;
  
 -- 4. Paginating family names with DNA sequences > 1,000,000:
 
-SELECT f.rfam_acc, f.rfam_id, subq.max_len
-FROM (
-    SELECT DISTINCT fr.rfam_acc, MAX(r.length) as max_len
-    FROM full_region fr
-    JOIN (
-        SELECT count(*), rfamseq_acc, length 
-        FROM rfamseq 
-        WHERE length > 1000000
-    ) r ON fr.rfamseq_acc = r.rfamseq_acc
-    GROUP BY fr.rfam_acc
-    ORDER BY max_len DESC
-    LIMIT 15 OFFSET 120 
-) subq
-JOIN family f ON f.rfam_acc = subq.rfam_acc
-ORDER BY subq.max_len DESC;
+-- SELECT f.rfam_acc, f.rfam_id, MAX(r.length) AS max_length
+-- FROM family f
+-- JOIN full_region fr ON fr.rfam_acc = f.rfam_acc
+-- JOIN rfamseq r ON r.rfamseq_acc = fr.rfamseq_acc
+-- WHERE r.length > 1000000
+-- GROUP BY f.rfam_acc, f.rfam_id
+-- ORDER BY max_length DESC
+-- LIMIT 15 OFFSET 120;
+
+
+-- +----------+-----------+------------+
+-- | rfam_acc | rfam_id   | max_length |
+-- +----------+-----------+------------+
+-- | RF00135  | snoZ223   |  836514780 |
+-- | RF00097  | snoR71    |  836514780 |
+-- | RF00012  | U3        |  836514780 |
+-- | RF01208  | snoR99    |  836514780 |
+-- | RF00337  | snoZ112   |  836514780 |
+-- | RF03674  | MIR5387   |  836514780 |
+-- | RF00030  | RNase_MRP |  836514780 |
+-- | RF00267  | snoR64    |  836514780 |
+-- | RF00445  | mir-399   |  836514780 |
+-- | RF01848  | ACEA_U3   |  836514780 |
+-- | RF00350  | snoZ152   |  836514780 |
+-- | RF00145  | snoZ105   |  830829764 |
+-- | RF00451  | mir-395   |  801256715 |
+-- | RF00329  | snoZ162   |  801256715 |
+-- | RF01424  | snoR118   |  801256715 |
+-- +----------+-----------+------------+
+-- 15 rows in set (0.16 sec)
 -- OFFSET = (page_number - 1) * results_per_page = (9-1) * 15 = 120
 
 
 
--- Filters rfamseq to only include sequences > 1,000,000 
--- Joins filtered sequences with full_region to connect them to families ||rfam_acc: Family accession ID => family.rfam_acc || rfamseq_acc: Sequence accession ID => rfamseq.rfamseq_acc
+-- Filters rfamseq to include only sequences where length > 1000000.
+-- Joins full_region to connect sequences to regions using rfamseq_acc.
+-- Joins family to associate regions with families using rfam_acc.
+-- Groups by rfam_acc, rfam_id to compute the maximum sequence length per family.
+-- Sorts families by MAX(r.length) in descending order.
+-- Gets the 9th page of results (skips 120 rows, takes 15).
+-- Returns family IDs, names, and their maximum sequence lengths.
 
--- Groups by family ID to find maximum sequence length per family  
--- Sorts families by their maximum sequence length (descending)
--- Gets the 9th page (skips 120 rows, takes 15)
--- Joins with family table to get the family names
--- Returns final sorted list of family IDs, names, and maximum lengths
-
--- Joining Logic
-
--- full_region.rfamseq_acc = rfamseq.rfamseq_acc: Connects sequences to regions
--- family.rfam_acc = full_region.rfam_acc: Connects regions to families
+-- Joining Logic:
+-- rfamseq.rfamseq_acc = full_region.rfamseq_acc -> Connects sequences to regions.
+-- full_region.rfam_acc = family.rfam_acc -> Connects regions to families.
