@@ -9,7 +9,6 @@ The script:
 1. Downloads the latest NAV data from amfiindia.com
 2. Extracts Scheme Name and Asset Value fields
 3. Creates a clean TSV (Tab Separated Values) file
-4. converts the data to JSON format
 
 ## Usage
 
@@ -22,15 +21,12 @@ Run the script:
 This will create:
 
 - `nav_data.tsv`: Contains the extracted data in TSV format
-- `nav_data.json`: JSON formatted version of the same data
 
 ## Requirements
 
 - Bash shell
 - curl or wget
 - awk
-- sed
-- jq (for JSON conversion)
 
 ## TSV vs JSON
 

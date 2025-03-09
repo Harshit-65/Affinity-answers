@@ -32,14 +32,14 @@ LIMIT 1;
  
 -- 4. Paginating family names with DNA sequences > 1,000,000:
 
--- SELECT f.rfam_acc, f.rfam_id, MAX(r.length) AS max_length
--- FROM family f
--- JOIN full_region fr ON fr.rfam_acc = f.rfam_acc
--- JOIN rfamseq r ON r.rfamseq_acc = fr.rfamseq_acc
--- WHERE r.length > 1000000
--- GROUP BY f.rfam_acc, f.rfam_id
--- ORDER BY max_length DESC
--- LIMIT 15 OFFSET 120;
+SELECT f.rfam_acc, f.rfam_id, MAX(r.length) AS max_length
+FROM family f
+JOIN full_region fr ON fr.rfam_acc = f.rfam_acc
+JOIN rfamseq r ON r.rfamseq_acc = fr.rfamseq_acc
+WHERE r.length > 1000000
+GROUP BY f.rfam_acc, f.rfam_id
+ORDER BY max_length DESC
+LIMIT 15 OFFSET 120;
 
 
 -- +----------+-----------+------------+
