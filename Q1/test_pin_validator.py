@@ -50,7 +50,7 @@ class TestPinValidator(unittest.TestCase):
 
     @patch('pin_validator.requests.get', side_effect=fake_requests_get)
     def test_valid_address_2(self, mock_get):
-        """Valid address with 'Bank Colony' and PIN 560050."""
+        """Valid address with 'Bank Colony or Banashankari' and PIN 560050."""
         address = ("2nd Phase, 374/B, 80 Feet Rd, Bank Colony, "
                    "Banashankari 3rd Stage, Srinivasa Nagar, Bengaluru, Karnataka 560050")
         is_valid, message = validate_address(address)
@@ -60,7 +60,7 @@ class TestPinValidator(unittest.TestCase):
     def test_valid_address_3(self, mock_get):
         """Valid address with 'State Bank Colony' that should match 'State Bank Of Mysore Colony'."""
         address = ("374/B, 80 Feet Rd, State Bank Colony, "
-                   "Banashankari 3rd Stage, Srinivasa Nagar, Bangalore. 560050")
+                   " Srinivasa Nagar, Bangalore. 560050")
         is_valid, message = validate_address(address)
         self.assertTrue(is_valid, msg=message)
 

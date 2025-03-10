@@ -93,6 +93,6 @@ def validate_address(address):
 
 if __name__ == "__main__":
     
-    address = "Kolsewadi, Katemanivali,Kalyan East,421306"
+    address = "Colony, Bengaluru, Karnataka 560050"
     is_valid, message = validate_address(address)
     print(is_valid, message)
