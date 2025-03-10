@@ -42,7 +42,7 @@ process_data() {
     # 3. then we store in TSV format
     awk -F';' '
         NF >= 5 {
-                print $4 "\t\t" $5
+                print $4 "\t" $5
         }
     ' "$TEMP_FILE" >> "$OUTPUT_FILE"
 }
