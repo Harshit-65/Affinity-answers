@@ -34,28 +34,15 @@ download_data() {
 }
 
 process_data() {
-    echo -e "Scheme Name\tAsset Value" > "$OUTPUT_FILE"
+    > "$OUTPUT_FILE"
 
     # Process the data:
     # 1. we look for lines with semicolons
     # 2. extract fields 4 (Scheme Name) and 5 (Asset Value)
-    # 3. we remove any quotes
-    # 4. then we convert to TSV format
+    # 3. then we store in TSV format
     awk -F';' '
         NF >= 5 {
-            # Remove any leading/trailing spaces
-            gsub(/^[ \t]+|[ \t]+$/, "", $4)
-            gsub(/^[ \t]+|[ \t]+$/, "", $5)
-            
-            # Skip empty or header lines
-            if ($4 != "" && $5 != "" && $4 !~ /^Scheme Name/) {
-                # Remove any quotes
-                gsub(/"/, "", $4)
-                gsub(/"/, "", $5)
-                
-                # Output in TSV format
-                print $4 "\t" $5
-            }
+                print $4 "\t\t" $5
         }
     ' "$TEMP_FILE" >> "$OUTPUT_FILE"
 }

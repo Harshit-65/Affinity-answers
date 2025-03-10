@@ -49,4 +49,3 @@ The script includes error checking for:
 
 - Failed downloads
 - File permission issues
-- Data format inconsistencies
