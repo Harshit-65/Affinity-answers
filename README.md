@@ -1,6 +1,3 @@
-# Affinity Answers Technical Assessment
-
-This repo contains my solutions to the Affinity Answers technical assessment.
 
 ## Q1: BestDelivery PIN Code Validator
 
